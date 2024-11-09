@@ -4,6 +4,7 @@ import cn.hlz.iojcodesandbox.model.ExecuteCodeRequest;
 import cn.hlz.iojcodesandbox.model.ExecuteCodeResponse;
 import cn.hlz.iojcodesandbox.model.ExecuteMessage;
 import cn.hlz.iojcodesandbox.model.JudgeInfo;
+import cn.hlz.iojcodesandbox.security.DefaultSecurityManager;
 import cn.hlz.iojcodesandbox.utils.ProcessUtils;
 import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.io.FileUtil;
@@ -38,6 +39,11 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
 
     private static final long TIME_OUT = 5000L;
 
+    private static final String SECURITY_MANAGER_PATH = "D\\ioj-code-sandbox\\src\\main\\resources\\security";
+
+    private static final String SECURITY_MANAGER_CLASS_NAME = "MySecurityManager";
+
+
     private static final List<String> blackList = Arrays.asList("Files", "exec");
 
     private static final WordTree WORD_TREE;
@@ -48,16 +54,18 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
     }
     @Override
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
+//        System.setSecurityManager(new DefaultSecurityManager());
+
         List<String> inputList = executeCodeRequest.getInputList();
         String code = executeCodeRequest.getCode();
         String language = executeCodeRequest.getLanguage();
 
         //校验代码中是否包含黑名单中的命令
-        FoundWord foundWord = WORD_TREE.matchWord(code);
-        if (foundWord != null){
-            System.out.println("发现敏感词");
-            return null;
-        }
+//        FoundWord foundWord = WORD_TREE.matchWord(code);
+//        if (foundWord != null){
+//            System.out.println("发现敏感词");
+//            return null;
+//        }
         String userDir = System.getProperty("user.dir");
         String globalCodePathName = userDir + File.separator + GLOBAL_CODE_DIR_NAME;
         //判题文件目录是否存在，没有则新建
@@ -82,8 +90,8 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
         //3 执行代码
         List<ExecuteMessage> executeMessageList = new ArrayList<>();
         for (String inputArgs : inputList) {
-            String runCmd = String.format("java -Xmx256m -Dfile.encoding=UTF-8 -cp %s Main %s", userCodeParentPath, inputArgs);
-//            String runCmd = String.format("java -Xmx256m -Dfile.encoding=UTF-8 -cp %s;%s -Djava.security.manager=%s Main %s", userCodeParentPath, SECURITY_MANAGER_PATH, SECURITY_MANAGER_CLASS_NAME, inputArgs);
+//            String runCmd = String.format("java -Xmx256m -Dfile.encoding=UTF-8 -cp %s Main %s", userCodeParentPath, inputArgs);
+            String runCmd = String.format("java -Xmx256m -Dfile.encoding=UTF-8 -cp %s;%s -Djava.security.manager=%s Main %s", userCodeParentPath, SECURITY_MANAGER_PATH, SECURITY_MANAGER_CLASS_NAME, inputArgs);
             try {
                 Process runProcess = Runtime.getRuntime().exec(runCmd);
                 // 超时控制
@@ -160,7 +168,7 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
         JavaNativeCodeSandbox javaNativeCodeSandbox = new JavaNativeCodeSandbox();
         ExecuteCodeRequest executeCodeRequest = new ExecuteCodeRequest();
         executeCodeRequest.setInputList(Arrays.asList("1 2", "3 4"));
-        String code = ResourceUtil.readStr("testCode/simpleComputeArgs/Main.java", StandardCharsets.UTF_8);
+        String code = ResourceUtil.readStr("testCode/unsafe/RunFileError.java", StandardCharsets.UTF_8);
 
         executeCodeRequest.setCode(code);
         executeCodeRequest.setLanguage("java");
