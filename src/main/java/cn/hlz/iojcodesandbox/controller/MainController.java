@@ -1,9 +1,9 @@
 package cn.hlz.iojcodesandbox.controller;
 
-import cn.hlz.iojcodesandbox.JavaNativeCodeSandbox;
+import cn.hlz.iojcodesandbox.javasandbox.JavaNativeCodeSandbox;
 import cn.hlz.iojcodesandbox.model.ExecuteCodeRequest;
 import cn.hlz.iojcodesandbox.model.ExecuteCodeResponse;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,15 +21,13 @@ import javax.servlet.http.HttpServletResponse;
  **/
 @RestController("/")
 public class MainController {
-    @GetMapping("/ok")
-    public String mainHello() {
-        return "ok";
-    }
 
     // 定义鉴权请求头和密钥
-    private static final String AUTH_REQUEST_HEADER = "auth";
+    @Value("${auth.request.header}")
+    private String AUTH_REQUEST_HEADER;
 
-    private static final String AUTH_REQUEST_SECRET = "secretKey";
+    @Value("${auth.request.secert}")
+    private String AUTH_REQUEST_SECRET;
 
     @Resource
     private JavaNativeCodeSandbox javaNativeCodeSandbox;
